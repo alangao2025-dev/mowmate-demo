@@ -216,3 +216,6 @@ textarea.inp{resize:none;height:64px}
 @keyframes tin{from{opacity:0;transform:translateY(-10px)}}
 @keyframes tout{to{opacity:0;transform:translateY(-10px)}}
 @media (max-width:420px){.tb-hide{display:none}}
+.tb-lang{font-weight:700;color:var(--g);border-color:#bfe0c8;min-width:48px}
+@media (max-width:900px){.topbar{gap:8px}.tb-right{gap:6px}.switch-side button{padding:6px 10px}}
+@media (max-width:400px){.tb-brand{display:none}}

@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN" translate="no">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MowMate Demo — 剪草坪接单平台原型</title>
 <link rel="stylesheet" href="style.css">
@@ -9,21 +10,22 @@
 <body data-show="customer">
 <header class="topbar">
   <div class="tb-left">
-    <div class="tb-title"><span class="logo-dot">🌿</span> MowMate<span class="tb-hide"> 原型演示</span></div>
-    <div class="tb-sub">左边是业主端，右边是师傅端，两边数据实时联动。试试：业主下单 → 师傅抢单 → 到达 → 完工 → 业主确认并评价</div>
+    <div class="tb-title"><span class="logo-dot">🌿</span><span class="tb-brand"> MowMate</span><span class="tb-hide" id="tb-name"> 原型演示</span></div>
+    <div class="tb-sub" id="tb-sub">左边是业主端，右边是师傅端，两边数据实时联动。试试：业主下单 → 师傅抢单 → 到达 → 完工 → 业主确认并评价</div>
   </div>
   <div class="tb-right">
     <div class="switch-side">
-      <button data-act="side" data-side="customer">业主端</button>
-      <button data-act="side" data-side="pro">师傅端</button>
+      <button data-act="side" data-side="customer" id="sw-customer">业主端</button>
+      <button data-act="side" data-side="pro" id="sw-pro">师傅端</button>
     </div>
-    <button class="tb-reset" data-act="reset">重置演示</button>
+    <button class="tb-reset tb-lang" data-act="lang" id="btn-lang">EN</button>
+    <button class="tb-reset" data-act="reset" id="btn-reset">重置演示</button>
   </div>
 </header>
 
 <main class="stage">
   <section class="phone-wrap" data-side="customer">
-    <div class="phone-label">Customer App · 业主端</div>
+    <div class="phone-label" id="lbl-customer">业主端 · Customer App</div>
     <div class="phone">
       <div class="statusbar"><span>9:41</span><span>●●● ᯤ ▮</span></div>
       <div class="app" id="customer"></div>
@@ -32,7 +34,7 @@
   </section>
 
   <section class="phone-wrap" data-side="pro">
-    <div class="phone-label">Pro App · 师傅端</div>
+    <div class="phone-label" id="lbl-pro">师傅端 · Pro App</div>
     <div class="phone pro">
       <div class="statusbar"><span>9:41</span><span>●●● ᯤ ▮</span></div>
       <div class="app" id="pro"></div>
