@@ -4,10 +4,6 @@ const CASH_OWED_LIMIT = 50;
 const PRO_NAME = 'Carlos M.';
 const SERVICES = [
   { id: 'mow', name: 'Mowing', add: 0, required: true },
-  { id: 'edge', name: 'Edging', add: 10 },
-  { id: 'blow', name: 'Blowing', add: 5 },
-  { id: 'bag', name: 'Bagging & haul away', add: 15 },
-  { id: 'hedge', name: 'Hedge trimming', add: 25 },
 ];
 const WINDOWS = ['8–11 AM', '11 AM–2 PM', '2–5 PM', 'Anytime'];
 const YARDS = { both: 'Front & back', front: 'Front only', back: 'Back only' };
@@ -25,7 +21,6 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const money = n => '$' + (Math.round(n * 100) / 100).toFixed(2).replace(/\.00$/, '');
 const dayISO = off => { const d = new Date(Date.now() + off * 864e5); return d.toISOString().slice(0, 10); };
 const fmtDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-const svcNames = ids => ids.map(id => SERVICES.find(s => s.id === id).name);
 
 function suggest(area, services) {
   const base = Math.max(30, area * 0.008);
@@ -40,10 +35,10 @@ function seedOrders() {
     date: dayISO(day), window: win, notes: '', gate: '', dog: false, status: 'open', pro: null, log: [{ st: 'open', t: Date.now() }], ...extra,
   });
   return [
-    o(101, 'Jennifer K.', '8801 Oak Hollow Dr, Austin, TX 78745', 'Oak Hollow Dr', 6500, 1.4, ['mow', 'edge', 'blow'], 62, 'card', 1, '8–11 AM'),
+    o(101, 'Jennifer K.', '8801 Oak Hollow Dr, Austin, TX 78745', 'Oak Hollow Dr', 6500, 1.4, ['mow'], 55, 'card', 1, '8–11 AM'),
     o(102, 'Mike R.', '2207 Barton Hills Dr, Austin, TX 78704', 'Barton Hills Dr', 4000, 2.8, ['mow'], 35, 'cash', 2, 'Anytime'),
-    o(103, 'Linda S.', '4410 Westlake Dr, Austin, TX 78746', 'Westlake Dr', 12000, 5.1, ['mow', 'edge', 'bag', 'hedge'], 145, 'card', 2, '2–5 PM', { dog: true, gate: '#4521', notes: 'Back gate on the left side.' }),
-    o(104, 'Tom H.', '615 Elm St, Austin, TX 78704', 'Elm St', 3000, 0.9, ['mow', 'blow'], 32, 'cash', 1, '11 AM–2 PM'),
+    o(103, 'Linda S.', '4410 Westlake Dr, Austin, TX 78746', 'Westlake Dr', 12000, 5.1, ['mow'], 100, 'card', 2, '2–5 PM', { dog: true, gate: '#4521', notes: 'Back gate on the left side.' }),
+    o(104, 'Tom H.', '615 Elm St, Austin, TX 78704', 'Elm St', 3000, 0.9, ['mow'], 30, 'cash', 1, '11 AM–2 PM'),
   ];
 }
 
@@ -59,10 +54,10 @@ function initialState() {
   };
 }
 function newForm() {
-  return { addr: 'a1', area: 5000, yard: 'both', services: ['mow', 'edge'], date: dayISO(1), window: '8–11 AM', gate: '', dog: false, notes: '', price: '', pay: 'card' };
+  return { addr: 'a1', area: 5000, yard: 'both', services: ['mow'], date: dayISO(1), window: '8–11 AM', gate: '', dog: false, notes: '', price: '', pay: 'card' };
 }
 
-const KEY = 'mowmate-demo-v1';
+const KEY = 'mowmate-demo-v2';
 let S;
 try { S = JSON.parse(localStorage.getItem(KEY)) || initialState(); } catch { S = initialState(); }
 const save = () => localStorage.setItem(KEY, JSON.stringify(S));
@@ -148,7 +143,7 @@ function custHome() {
 
 function orderCard(o) {
   return `<div class="card ord" data-act="c-open" data-id="${o.id}">
-    <div class="top"><div><div class="b">${esc(o.street)}</div><div class="meta">${fmtDate(o.date)} · ${o.window}<br>${svcNames(o.services).join(', ')}</div></div>
+    <div class="top"><div><div class="b">${esc(o.street)}</div><div class="meta">${fmtDate(o.date)} · ${o.window}<br>${o.area.toLocaleString()} sq ft · ${YARDS[o.yard]}</div></div>
     <div style="text-align:right"><div class="price">${money(o.price)}</div>${payChip(o)}</div></div>
     <div style="margin-top:8px">${stChip(o)}</div></div>`;
 }
@@ -169,8 +164,6 @@ function custBook() {
       <div class="mut small" style="margin-top:4px">sq ft</div></div>
     <div class="field"><label class="lb">Yard</label>
       <div class="seg">${Object.entries(YARDS).map(([k, v]) => `<label><input type="radio" name="yard" value="${k}" ${f.yard === k ? 'checked' : ''}>${v}</label>`).join('')}</div></div>
-    <div class="field"><label class="lb">Services</label>
-      ${SERVICES.map(s => `<label class="svc"><span class="l"><input type="checkbox" name="services" value="${s.id}" ${f.services.includes(s.id) ? 'checked' : ''} ${s.required ? 'disabled' : ''}>${s.name}${s.required ? ' <span class="mut small">&nbsp;(required)</span>' : ''}</span><span class="mut small">${s.add ? 'typ. +$' + s.add : ''}</span></label>`).join('')}</div>
     <div class="field"><label class="lb">When</label>
       <div class="inline"><input class="inp" type="date" name="date" min="${dayISO(0)}" value="${f.date}">
       <select class="inp" name="window">${WINDOWS.map(w => `<option ${f.window === w ? 'selected' : ''}>${w}</option>`).join('')}</select></div></div>
@@ -210,7 +203,7 @@ function readForm() {
   f.area = Number(fd.get('area')) || 0;
   if (f.addr !== prevAddr) { f.area = ADDRESSES.find(a => a.id === f.addr).area; fm.area.value = f.area; }
   f.yard = fd.get('yard');
-  f.services = ['mow', ...fd.getAll('services')];
+  f.services = ['mow'];
   f.date = fd.get('date');
   f.window = fd.get('window');
   f.gate = fd.get('gate');
@@ -227,7 +220,7 @@ function updatePrice() {
   const f = S.cust.form;
   const [lo, hi] = suggest(f.area, f.services);
   const p = Number(f.price);
-  document.getElementById('sug').innerHTML = `Similar lawns nearby: <b>${money(lo)} – ${money(hi)}</b> (based on ${f.area.toLocaleString()} sq ft + extras)`;
+  document.getElementById('sug').innerHTML = `Similar lawns nearby: <b>${money(lo)} – ${money(hi)}</b> (based on ${f.area.toLocaleString()} sq ft)`;
   const max = hi * 1.4;
   document.getElementById('meter-dot').style.left = Math.min(100, Math.max(0, p / max * 100)) + '%';
   let note = '';
@@ -293,7 +286,6 @@ function custOrder(o) {
     <div class="kv"><span>Address</span><span>${esc(o.full)}</span></div>
     <div class="kv"><span>Date</span><span>${fmtDate(o.date)} · ${o.window}</span></div>
     <div class="kv"><span>Lawn</span><span>${o.area.toLocaleString()} sq ft · ${YARDS[o.yard]}</span></div>
-    <div class="kv"><span>Services</span><span style="text-align:right">${svcNames(o.services).join(', ')}</span></div>
     ${o.notes ? `<div class="kv"><span>Notes</span><span style="text-align:right;max-width:60%">${esc(o.notes)}</span></div>` : ''}
     <hr><div class="kv"><span>Your price</span><span class="b">${money(o.price)}</span></div>
     <div class="kv"><span>Payment</span><span>${o.pay === 'cash' ? 'Cash to pro' : (o.status === 'cancelled' ? 'Refunded' : (o.status === 'completed' ? 'Paid · Visa 4242' : 'Held · Visa 4242'))}</span></div>
@@ -356,7 +348,7 @@ function jobCard(o) {
         <div class="line">🗓️ ${fmtDate(o.date)} · ${o.window}</div>
         <div class="line">📐 ${o.area.toLocaleString()} sq ft · ${YARDS[o.yard]}</div>
       </div></div>
-    <div>${svcNames(o.services).map(n => `<span class="tag">${n}</span>`).join('')}${o.dog ? '<span class="tag alert">🐕 Dog in yard</span>' : ''}${c ? '<span class="tag alert">⚠ Time conflict</span>' : ''}</div>
+    <div>${o.dog ? '<span class="tag alert">🐕 Dog in yard</span>' : ''}${c ? '<span class="tag alert">⚠ Time conflict</span>' : ''}</div>
     <div class="acts"><button class="btn ghost" data-act="p-open" data-id="${o.id}">Details</button>
       <button class="btn primary" data-act="p-accept" data-id="${o.id}" ${locked ? 'disabled' : ''}>${locked ? 'Settle fees first' : 'Accept'}</button></div>
   </div>`;
@@ -389,7 +381,6 @@ function proJob(o) {
     ${mine ? `<div class="kv"><span>Gate code</span><span class="b">${o.gate ? esc(o.gate) : '—'}</span></div>` : ''}
     <div class="kv"><span>Date</span><span>${fmtDate(o.date)} · ${o.window}</span></div>
     <div class="kv"><span>Lawn</span><span>${o.area.toLocaleString()} sq ft · ${YARDS[o.yard]}</span></div>
-    <div class="kv"><span>Services</span><span style="text-align:right">${svcNames(o.services).join(', ')}</span></div>
     ${o.notes ? `<div class="kv"><span>Notes</span><span style="text-align:right;max-width:60%">${esc(o.notes)}</span></div>` : ''}
     ${o.dog ? `<div class="note err">🐕 Dog in yard — ask the owner before entering.</div>` : ''}
     ${!mine ? `<div class="note info">🔒 Exact address and gate code are shown after you accept.</div>` : ''}
